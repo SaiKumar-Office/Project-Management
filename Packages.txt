@@ -1,0 +1,6 @@
+react-router-dom
+axios
+redux
+react-redux
+tailwindcss
+react-beautiful-dnd

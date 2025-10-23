@@ -1,0 +1,17 @@
+project_management_backend/
+│
+├─ app/
+│   ├─ main.py           # FastAPI app entrypoint
+│   ├─ config.py         # DB config + environment variables
+│   ├─ models.py         # SQLAlchemy models (User, Project, Task)
+│   ├─ schemas.py        # Pydantic models for request/response
+│   ├─ database.py       # DB connection
+│   ├─ auth.py           # JWT utilities
+│   ├─ routers/
+│   │   ├─ auth.py       # signup/login
+│   │   ├─ projects.py   # project CRUD
+│   │   └─ tasks.py      # task CRUD
+│   └─ dependencies.py   # Dependency functions (auth middleware)
+│
+├─ .env                  # Environment variables (DB URL, SECRET_KEY)
+└─ requirements.txt      # Freeze packages
