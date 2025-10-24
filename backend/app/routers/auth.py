@@ -1,28 +1,73 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from .. import schemas, models, auth
-from ..database import get_db
+from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordRequestForm
+
+from app.database import get_db
+from app import models, schemas
+from app.auth import create_access_token
+from app.dependencies import get_current_user
 
 router = APIRouter()
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-@router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
-def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    # check existing
-    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
-    if existing:
+# Helper: Hash password
+def hash_password(password: str):
+    return pwd_context.hash(password)
+
+# Helper: Verify password
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+# Signup route
+@router.post("/signup", response_model=schemas.UserResponse)
+def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed = auth.get_password_hash(user_in.password)
-    user = models.User(name=user_in.name, email=user_in.email, hashed_password=hashed)
-    db.add(user)
+    
+    hashed_pw = hash_password(user.password)
+    new_user = models.User(
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_pw,
+        role=user.role
+    )
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(new_user)
+    return new_user
 
-@router.post("/login", response_model=schemas.Token)
-def login(form_data: schemas.UserCreate, db: Session = Depends(get_db)):
-    # Accept email + password in body as { email, password } (we reuse schema fields)
-    user = db.query(models.User).filter(models.User.email == form_data.email).first()
-    if not user or not auth.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
-    access_token = auth.create_access_token({"sub": str(user.id)})
+# Login route
+@router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    access_token = create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
+
+# Get current user
+@router.get("/me", response_model=schemas.UserResponse)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+# app/auth.py
+
+
+@router.get("/users", response_model=list[schemas.UserResponse])
+def get_all_users(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Step 1: Check Role
+    if current_user.role not in ["admin", "superadmin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view all users"
+        )
+    
+    # Step 2: Fetch all users
+    users = db.query(models.User).all()
+    return users

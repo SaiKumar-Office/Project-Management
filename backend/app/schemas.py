@@ -1,33 +1,37 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 
-# --- User ---
+# ---------- User Create ----------
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    role: Optional[str] = None  # optional role (user/admin/super-admin)
 
+# ---------- User Login ----------
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+# ---------- User Response ----------
 class UserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
-    is_admin: bool
+    role: str
 
     class Config:
         orm_mode = True
 
-# --- Token ---
+# ---------- Token ----------
 class Token(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str
 
-# --- Project ---
+
+# Project Schemas
 class ProjectCreate(BaseModel):
     title: str
-    description: Optional[str] = None
-
-class ProjectUpdate(BaseModel):
-    title: Optional[str] = None
     description: Optional[str] = None
 
 class ProjectResponse(BaseModel):
@@ -35,31 +39,26 @@ class ProjectResponse(BaseModel):
     title: str
     description: Optional[str]
     owner_id: int
-    members: List[UserResponse] = []
 
     class Config:
         orm_mode = True
 
-# --- Task ---
+# Task Schemas
 class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
     status: Optional[str] = "Todo"
     assignee_id: Optional[int] = None
+    project_id: int   
 
-class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
-    assignee_id: Optional[int] = None
 
 class TaskResponse(BaseModel):
     id: int
     title: str
     description: Optional[str]
     status: str
-    project_id: Optional[int]
-    assignee: Optional[UserResponse] = None
+    project_id: int
+    assignee_id: Optional[int]
 
     class Config:
         orm_mode = True
