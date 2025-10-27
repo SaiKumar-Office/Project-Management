@@ -4,6 +4,11 @@
   padding: 2rem;
   text-align: center;
 }
+#root {
+  background: #0d1b2a;
+  color: white;
+  min-height: 100vh;
+}
 
 .logo {
   height: 6em;

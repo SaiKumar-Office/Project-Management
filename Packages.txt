@@ -4,3 +4,4 @@ redux
 react-redux
 tailwindcss
 react-beautiful-dnd
+npm i --save-dev @types/node

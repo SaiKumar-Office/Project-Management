@@ -1,0 +1,41 @@
+frontend/
+│
+├─ src/
+│   ├─ api/                 # Axios API calls
+│   │   ├─ authApi.ts
+│   │   ├─ projectApi.ts
+│   │   └─ taskApi.ts
+│
+│   ├─ components/          # Reusable components
+│   │   ├─ Navbar.tsx
+│   │   ├─ Sidebar.tsx
+│   │   ├─ TaskCard.tsx
+│   │   ├─ CommentBox.tsx
+│   │   └─ Loader.tsx       # Universal app loader
+│
+│   ├─ features/            # Redux slices
+│   │   ├─ authSlice.ts
+│   │   ├─ projectSlice.ts
+│   │   └─ taskSlice.ts
+│
+│   ├─ pages/
+│   │   ├─ Login.tsx
+│   │   ├─ Register.tsx
+│   │   ├─ Dashboard.tsx
+│   │   ├─ ProjectDetail.tsx
+│   │   ├─ Tasks.tsx
+│   │   └─ Settings.tsx
+│
+│   ├─ routes/
+│   │   └─ AppRouter.tsx
+│
+│   ├─ utils/
+│   │   ├─ privateRoute.tsx
+│   │   └─ constants.ts
+│
+│   ├─ App.tsx
+│   └─ main.tsx
+│
+├─ index.html
+├─ package.json
+└─ tsconfig.json

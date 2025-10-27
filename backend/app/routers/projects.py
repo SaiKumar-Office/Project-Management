@@ -8,7 +8,7 @@ from app.dependencies import get_current_user
 
 router = APIRouter()
 
-# Create Project
+# Create Project (owner only)
 @router.post("/", response_model=schemas.ProjectResponse)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     new_project = models.Project(
@@ -21,8 +21,9 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     db.refresh(new_project)
     return new_project
 
+
 # Get All Projects for Current User
-@router.get("/", response_model=List[schemas.ProjectResponse])
+@router.get("/create_project", response_model=List[schemas.ProjectResponse])
 def get_projects(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     if current_user.role in ["admin", "superadmin"]:
         projects = db.query(models.Project).all()
@@ -30,7 +31,7 @@ def get_projects(db: Session = Depends(get_db), current_user: models.User = Depe
         projects = db.query(models.Project).filter(models.Project.owner_id == current_user.id).all()
     return projects
 
-# Update Project (only owner or admin)
+# Update project members
 @router.put("/{project_id}", response_model=schemas.ProjectResponse)
 def update_project(project_id: int, project: schemas.ProjectCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
@@ -39,7 +40,7 @@ def update_project(project_id: int, project: schemas.ProjectCreate, db: Session 
     if db_project.owner_id != current_user.id and current_user.role not in ["admin", "superadmin"]:
         raise HTTPException(status_code=403, detail="Not authorized to update this project")
     db_project.title = project.title
-    db_project.description = project.description
+    db_project.description = project.description    
     db.commit()
     db.refresh(db_project)
     return db_project
@@ -55,3 +56,19 @@ def delete_project(project_id: int, db: Session = Depends(get_db), current_user:
     db.delete(db_project)
     db.commit()
     return {"detail": "Project deleted successfully"}
+
+# Add/Remove project members
+@router.put("/{project_id}/members", response_model=schemas.ProjectResponse)
+def update_project_members(project_id: int, member_ids: List[int], db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    # Only owner or admin can update members
+    if project.owner_id != current_user.id and current_user.role not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Not authorized to update members")
+    
+    members = db.query(models.User).filter(models.User.id.in_(member_ids)).all()
+    project.members = members
+    db.commit()
+    db.refresh(project)
+    return project
