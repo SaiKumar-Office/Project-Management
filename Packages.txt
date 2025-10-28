@@ -5,3 +5,4 @@ react-redux
 tailwindcss
 react-beautiful-dnd
 npm i --save-dev @types/node
+https://v3.tailwindcss.com/docs/guides/create-react-app
