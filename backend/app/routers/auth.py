@@ -5,8 +5,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.database import get_db
 from app import models, schemas
-from app.auth import create_access_token
-from app.dependencies import get_current_user
+from app.auth import create_access_token, decode_access_token
+from app.dependencies import get_current_user, oauth2_scheme
+from app.models import BlacklistedToken
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
@@ -47,6 +48,21 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     access_token = create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/logout")
+def logout(
+    current_user: models.User = Depends(get_current_user),
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+    return {"message": "Successfully logged out"}
+
+
+
 
 # Get current user
 @router.get("/me", response_model=schemas.UserResponse)

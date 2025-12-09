@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* src/index.css (append) */
+:root{
+  --primary-green: #1f9d55; /* main green */
+  --primary-green-600: #14804a;
+  --muted: #6b7280;
+  --card-bg: #ffffff;
+}
+
+/* Reusable rounded card */
+.card-curved {
+  @apply bg-ui-bg rounded-2xl p-6 shadow-soft;
+}
+/* .card {
+  @apply bg-white rounded-2xl shadow-md p-6;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+} */
+
+/* Primary button */
+.btn-primary {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-semibold transition-transform duration-150;
+  background: linear-gradient(90deg, var(--primary-green) 0%, var(--primary-green-600) 100%);
+  color: white;
+  box-shadow: 0 6px 18px rgba(31,157,85,0.16);
+}
+.btn-primary:hover { transform: translateY(-3px); }
+.btn-primary:active { transform: translateY(-1px) scale(0.995); }
+
+/* Secondary button */
+.btn-ghost {
+  @apply px-3 py-2 rounded-xl font-medium border;
+  border-color: rgba(31,157,85,0.08);
+  color: var(--primary-green);
+  background: transparent;
+}
+
+/* input */
+.input {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-200;
+}
+
+/* subtle page background */
+.app-bg {
+  background: linear-gradient(180deg, #F8FBF9 0%, #FFFFFF 100%);
+}
 
 body {
   margin: 0;
@@ -27,7 +71,7 @@ code {
 .btn-primary:active {
   @apply scale-95;
 } */
-.btn-primary {
+/* .btn-primary {
   @apply bg-gold-600 scale-50 text-black px-4 py-2 rounded-lg font-semibold shadow-md 
          transition-all duration-300 ease-in-out;
 }
@@ -38,4 +82,4 @@ code {
 
 .btn-primary:active {
   @apply scale-95;
-}
+} */

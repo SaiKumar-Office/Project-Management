@@ -1,22 +1,30 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
       colors: {
-        gold: {
-          100: "#fff8dc",
-          200: "#ffeb99",
-          300: "#ffd966",
-          400: "#ffcc33",
-          500: "#ffbf00", // main gold color
-          600: "#cc9900",
-          700: "#996600",
+        brand: {
+          50: "#f6fffa",
+          100: "#e6fff0",
+          300: "#66d19a",
+          500: "#2bb673", // primary green
+          700: "#1f8a53"
         },
+        ui: {
+          bg: "#FFFFFF",
+          muted: "#F3F7F4",
+          accent: "#E8F8EE"
+        }
       },
-    },
+      borderRadius: {
+        xl: "1rem",
+        '2xl': '1.5rem'
+      },
+      boxShadow: {
+        soft: "0 6px 20px rgba(32, 64, 32, 0.08)"
+      }
+    }
   },
   plugins: [],
-}
+};

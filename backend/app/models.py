@@ -24,6 +24,14 @@ class User(Base):
     tasks = relationship("Task", back_populates="assignee")
     member_projects = relationship("Project", secondary=project_members, back_populates="members")
 
+class BlacklistedToken(Base):
+    __tablename__ = "blacklisted_tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, nullable=False, unique=True)
+    expires_at = Column(Integer, nullable=False)  # store as timestamp
+
+
 class Project(Base):
     __tablename__ = "projects"
     

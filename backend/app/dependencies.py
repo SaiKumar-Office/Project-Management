@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session
 from app.auth import SECRET_KEY, ALGORITHM
 from app.database import get_db
 from app import models
+from app.models import BlacklistedToken
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -14,6 +16,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    # Check if token is blacklisted
+    blacklisted = db.query(BlacklistedToken).filter(BlacklistedToken.token == token).first()
+    if blacklisted:
+        raise HTTPException(status_code=401, detail="Token has been revoked. Please login again.")
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("user_id")
@@ -26,3 +34,4 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
