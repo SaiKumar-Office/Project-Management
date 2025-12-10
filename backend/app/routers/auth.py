@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -49,17 +50,27 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @router.post("/logout")
 def logout(
     current_user: models.User = Depends(get_current_user),
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
+    # Decode token to get expiration time
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=400, detail="Invalid token")
-
+    
+    exp_timestamp = payload.get("exp")
+    
+    # Add token to blacklist
+    blacklisted_token = BlacklistedToken(token=token, expires_at=exp_timestamp)
+    db.add(blacklisted_token)
+    db.commit()
+    
     return {"message": "Successfully logged out"}
+
 
 
 

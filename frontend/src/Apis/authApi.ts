@@ -1,47 +1,77 @@
 // src/Apis/authApi.ts
-import axios from "axios";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const BASE_URL = "http://localhost:8000/auth"; // adjust if needed
 
-const api = axios.create({
-  baseURL: API_BASE,
-  headers: {
-    "Content-Type": "application/json"
-  },
-});
+// Signup
+export async function signupApi(data: {
+    name: string;
+    email: string;
+    password: string;
+    // role: string;
+}) {
+    const res = await fetch(`${BASE_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
 
-// attach token automatically
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-}, (err) => Promise.reject(err));
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.detail || "Signup failed");
+    }
 
-export type AuthResponse = {
-  access_token: string;
-  token_type: "bearer";
-};
+    return res.json();
+}
 
-export const loginApi = async (email: string, password: string): Promise<AuthResponse> => {
-  // FastAPI expects OAuth2PasswordRequestForm for /auth/login. We will send as form data.
-  const body = new URLSearchParams();
-  body.append("username", email);
-  body.append("password", password);
+// Login
+export async function loginApi(data: { email: string; password: string }) {
+    const form = new URLSearchParams();
+    form.append("username", data.email);
+    form.append("password", data.password);
 
-  const res = await api.post<AuthResponse>("/auth/login", body, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-  });
-  return res.data;
-};
+    const res = await fetch(`${BASE_URL}/login`, {
+        method: "POST",
+        body: form,
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+    });
 
-export const signupApi = async (name: string, email: string, password: string) => {
-  const res = await api.post("/auth/signup", { name, email, password });
-  return res.data; // returns user object
-};
+    if (!res.ok) throw new Error("Invalid credentials");
+    return res.json();
+}
 
-export const fetchMe = async () => {
-  const res = await api.get("/auth/me");
-  return res.data;
-};
+// Get current user (/me)
+export async function getMeApi(token: string) {
+    const res = await fetch(`${BASE_URL}/me`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
-export default api;
+    if (!res.ok) throw new Error("Unauthorized");
+    return res.json();
+}
+
+// Logout
+export async function logoutApi(token: string) {
+    const res = await fetch(`${BASE_URL}/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Logout failed");
+    return res.json();
+}
+
+// Admin: Get all users
+export async function getAllUsersApi(token: string) {
+    const res = await fetch(`${BASE_URL}/users`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!res.ok) throw new Error("Not authorized");
+    return res.json();
+}

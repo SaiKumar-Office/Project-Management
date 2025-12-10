@@ -1,17 +1,23 @@
 // src/components/ProtectedRoute.tsx
-import React, { JSX } from "react";
-import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAppSelector } from "../redux/customHooks";
 
-type Props = { children: JSX.Element };
+interface ProtectedRouteProps {
+  redirectPath?: string;
+}
 
-const ProtectedRoute: React.FC<Props> = ({ children }) => {
-  const token = useSelector((s: RootState) => s.auth.token);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ redirectPath = "/" }) => {
+  // Get token from Redux store
+  const token = useAppSelector((state) => state.loginUser.token);
+
+  // If no token, redirect to login
   if (!token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirectPath} replace />;
   }
-  return children;
+
+  // Otherwise, render nested routes
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

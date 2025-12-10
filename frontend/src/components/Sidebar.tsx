@@ -1,11 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
+import { useAppSelector } from "../redux/customHooks";
 
 const Sidebar: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useAppSelector((state) => state.user.currentUser);
 
   // If user not logged in, don't render sidebar
   if (!user) return null;
@@ -40,7 +39,7 @@ const Sidebar: React.FC = () => {
             key={it.to}
             to={it.to}
             className={({ isActive }) =>
-              `py-3 px-4 rounded-xl text-sm font-medium transition-all ${
+              `py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-[var(--primary-green)] text-white shadow-md"
                   : "text-gray-700 hover:bg-green-50"

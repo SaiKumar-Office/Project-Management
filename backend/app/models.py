@@ -32,6 +32,7 @@ class BlacklistedToken(Base):
     expires_at = Column(Integer, nullable=False)  # store as timestamp
 
 
+
 class Project(Base):
     __tablename__ = "projects"
     

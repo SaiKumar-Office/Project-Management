@@ -1,15 +1,15 @@
-// src/redux/store.ts
-import { configureStore } from "@reduxjs/toolkit";
-import { useDispatch } from "react-redux";
-import authReducer from "./Login/loginUserSlice";
+import { configureStore } from '@reduxjs/toolkit';
+import loginUserSlice from './Login/loginUserSlice';
+import userSlice from './User/userSlice';
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
-    auth: authReducer,
+    loginUser: loginUserSlice,
+    user: userSlice,
   },
-  middleware: (getDefault) => getDefault(),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export const useAppDispatch = () => useDispatch<AppDispatch>();
+
+export default store;
